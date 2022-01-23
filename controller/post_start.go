@@ -12,8 +12,8 @@ func PostStart(c *gin.Context) {
 	var ipAddress string
 	var result apimodel.Result
 
-	// ipAddress = c.ClientIP()
-	ipAddress = "192.168.71.36"
+	ipAddress = c.ClientIP()
+	// ipAddress = "127.0.0.1"
 	result = service.Bench(ipAddress)
 
 	c.JSON(http.StatusOK, gin.H{"result": result})
