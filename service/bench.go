@@ -103,18 +103,23 @@ func Bench(ipAddress string) apimodel.Result {
 	} else if latency >= 2000 {
 		threads = 5
 	}
+	offset := latency / int64(threads)
 	result.Score = 10
 	team.Score = result.Score
 	// 設定スレッド数でリクエストを流す
 	var wg sync.WaitGroup
 	wg.Add(threads)
 	var mu sync.Mutex
-	for i := 0; i < threads; i++ {
+	i := 0
+	for i < threads {
 		go func() {
 			// スレッド毎の初期値を設定
 			thscore := 0
 			thlastcount := -1
 			thmessage := ""
+			if i > 0 {
+				time.Sleep((time.Duration(offset) * time.Millisecond))
+			}
 			for thmessage == "" && time.Since(now).Seconds() < 60 {
 				// 一覧データを取得
 				thitems, therr := listItem(ipAddress, 30)
@@ -154,6 +159,7 @@ func Bench(ipAddress string) apimodel.Result {
 				result.Message = thmessage
 			}
 		}()
+		i++
 	}
 	wg.Wait()
 	// DB に結果を書き込む
@@ -163,6 +169,7 @@ func Bench(ipAddress string) apimodel.Result {
 		result.Message = "内部エラーが発生しました。運営に連絡してください : ベンチマーク用 team テーブルの更新でエラーが発生しました"
 		return result
 	}
+	result.Message = "ベンチマークが完走しました!!"
 	return result
 }
 
