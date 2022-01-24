@@ -78,7 +78,7 @@ func Bench(ipAddress string) apimodel.Result {
 			result.Message = "内部エラーが発生しました。運営に連絡してください : ベンチマーク用 team テーブルの更新でエラーが発生しました"
 			return result
 		}
-		result.Message = "一覧データ取得リクエストが失敗しました：応答がないか不正です"
+		result.Message = "一覧データ取得リクエストが失敗しました : 応答がないか不正です"
 		return result
 	}
 	// 最初の一覧データをチェック
@@ -90,7 +90,7 @@ func Bench(ipAddress string) apimodel.Result {
 			result.Message = "内部エラーが発生しました。運営に連絡してください : ベンチマーク用 team テーブルの更新でエラーが発生しました"
 			return result
 		}
-		result.Message = "一覧データ取得リクエストが失敗しました：" + message
+		result.Message = "一覧データ取得リクエストが失敗しました : " + message
 		return result
 	}
 	// チェック用のパラメータを設定
@@ -120,23 +120,23 @@ func Bench(ipAddress string) apimodel.Result {
 				thitems, therr := listItem(ipAddress, 30)
 				if therr != nil {
 					// 一覧データ取得でエラーが発生
-					thmessage = "一覧データ取得リクエストが失敗しました：応答がないか不正です"
+					thmessage = "一覧データ取得リクエストが失敗しました : 応答がないか不正です"
 				} else if time.Since(now).Seconds() < 60 {
 					// 時間内なら一覧データをチェック
 					tmpmessage, tmpcount := checkItem(thitems, false, thlastcount, pictures)
 					if tmpmessage != "" {
 						// 一覧データ取得のチェックが失敗
-						thmessage = "一覧データ取得リクエストが失敗しました：" + tmpmessage
+						thmessage = "一覧データ取得リクエストが失敗しました : " + tmpmessage
 					} else {
 						// 一覧データ取得のスコアを加算
 						thscore += 10
 						thlastcount = tmpcount
 						if time.Since(now).Seconds() < 60 {
 							// 時間内なら写真画像データを取得
-							tmpmessage = getImage(thitems[24].PictureId, pictures)
+							tmpmessage = getImage(ipAddress, thitems[24].PictureId, pictures)
 							if tmpmessage != "" {
 								// 写真画像データのチェックが失敗
-								thmessage = "写真画像データ取得リクエストが失敗しました：" + tmpmessage
+								thmessage = "写真画像データ取得リクエストが失敗しました : " + tmpmessage
 							} else if time.Since(now).Seconds() < 60 {
 								// 時間内なら写真画像データのスコアを加算
 								thscore += 2
@@ -171,7 +171,7 @@ func initData(ipAddress string) (string, error) {
 	// URL を生成
 	u := &url.URL{}
 	u.Scheme = "http"
-	u.Host = "localhost:8080"
+	u.Host = ipAddress + ":8080"
 	u.Path = "/kusocode3/InitData"
 	uStr := u.String()
 	// ポストデータ（ダミー）
@@ -206,7 +206,7 @@ func listItem(ipAddress string, timeout int) ([]apimodel.Item, error) {
 	// URL を生成
 	u := &url.URL{}
 	u.Scheme = "http"
-	u.Host = "localhost:8080"
+	u.Host = ipAddress + ":8080"
 	u.Path = "/kusocode3/ListItem"
 	uStr := u.String()
 	// タイムアウトを 10 秒に指定
@@ -230,6 +230,7 @@ func listItem(ipAddress string, timeout int) ([]apimodel.Item, error) {
 }
 
 func checkItem(items []apimodel.Item, zerocheck bool, lasttotal int, pictures [25]dbmodel.Picture) (string, int) {
+	// 注 : 余分な項目があるのは許容・count が 0 の場合、count 項目自体が存在しないのは許容
 	var message string
 	totalcount := 0
 	// 25 行あるか？
@@ -285,12 +286,12 @@ func checkItem(items []apimodel.Item, zerocheck bool, lasttotal int, pictures [2
 	return message, totalcount
 }
 
-func getImage(pictureId int, pictures [25]dbmodel.Picture) string {
+func getImage(ipAddress string, pictureId int, pictures [25]dbmodel.Picture) string {
 	var message string
 	// URL を生成
 	u := &url.URL{}
 	u.Scheme = "http"
-	u.Host = "localhost:8080"
+	u.Host = ipAddress + ":8080"
 	u.Path = "/kusocode3/GetImage"
 	u.RawQuery = "pictureId=" + strconv.Itoa(pictureId)
 	uStr := u.String()
