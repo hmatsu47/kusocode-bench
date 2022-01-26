@@ -94,7 +94,7 @@ func Bench(ipAddress string) apimodel.Result {
 		return result
 	}
 	// チェック用のパラメータを設定
-	threads := 10
+	threads := 20
 	latency := time.Since(now).Milliseconds()
 	if latency >= 5000 {
 		threads = 2
@@ -102,6 +102,8 @@ func Bench(ipAddress string) apimodel.Result {
 		threads = 4
 	} else if latency >= 2000 {
 		threads = 5
+	} else if latency >= 1000 {
+		threads = 10
 	}
 	offset := latency / int64(threads)
 	result.Score = 10
@@ -169,7 +171,9 @@ func Bench(ipAddress string) apimodel.Result {
 		result.Message = "内部エラーが発生しました。運営に連絡してください : ベンチマーク用 team テーブルの更新でエラーが発生しました"
 		return result
 	}
-	result.Message = "ベンチマークが完走しました!!"
+	if result.Message == "" {
+		result.Message = "ベンチマークが完走しました!!"
+	}
 	return result
 }
 
