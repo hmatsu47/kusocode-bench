@@ -220,7 +220,7 @@ func listItem(ipAddress string, timeout int) ([]apimodel.Item, error) {
 	u.Host = ipAddress + ":8080"
 	u.Path = "/kusocode3/ListItem"
 	uStr := u.String()
-	// タイムアウトを 10 秒に指定
+	// タイムアウトを引数で渡された秒数に指定
 	client := &http.Client{Timeout: time.Duration(timeout) * time.Second}
 	// GET リクエスト発行
 	resp, err := client.Get(uStr)
@@ -306,7 +306,7 @@ func getImage(ipAddress string, pictureId int, pictures [25]dbmodel.Picture) str
 	u.Path = "/kusocode3/GetImage"
 	u.RawQuery = "pictureId=" + strconv.Itoa(pictureId)
 	uStr := u.String()
-	// タイムアウトを 10 秒に指定
+	// タイムアウトを 30 秒に指定
 	client := &http.Client{Timeout: time.Duration(30) * time.Second}
 	// GET リクエスト発行
 	resp, err := client.Get(uStr)
